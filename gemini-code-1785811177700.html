@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Ventas - Tiendas</title>
+    <style>
+        :root {
+            --primary-color: #1b5e20;
+            --secondary-color: #2e7d32;
+            --accent-green: #388e3c;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #dddddd;
+            
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --warning-bg: #fffde7;
+            --warning-text: #f57f17;
+            --danger-bg: #ffebee;
+            --danger-text: #c62828;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--secondary-color);
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 10px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background-color: var(--secondary-color);
+        }
+
+        th::after {
+            content: ' ↕';
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Indicadores visuales y etiquetas */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .badge-success {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        .badge-warning {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+        }
+
+        .badge-danger {
+            background-color: var(--danger-bg);
+            color: var(--danger-text);
+        }
+
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .dot-green {
+            background-color: #2e7d32;
+        }
+
+        .dot-red {
+            background-color: #c62828;
+        }
+
+        /* Barras de progreso integradas */
+        .progress-bar-container {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 80px;
+            height: 12px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #42a5f5, #1e88e5);
+        }
+
+        footer {
+            margin-top: 15px;
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Dashboard de Rendimiento por Tienda</h1>
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Buscar tienda..." onkeyup="filterTable()">
+        </div>
+    </header>
+
+    <div class="table-container">
+        <table id="dashboardTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Tienda</th>
+                    <th onclick="sortTable(1)" class="text-right">Meta</th>
+                    <th onclick="sortTable(2)" class="text-right">Venta Actual</th>
+                    <th onclick="sortTable(3)" class="text-right">Pendiente</th>
+                    <th onclick="sortTable(4)" class="text-center">Cum Mensual</th>
+                    <th onclick="sortTable(5)" class="text-center">% Proyectado</th>
+                    <th onclick="sortTable(6)" class="text-right">Venta 2025</th>
+                    <th onclick="sortTable(7)" class="text-right">Venta 2026</th>
+                    <th onclick="sortTable(8)" class="text-center">Estado</th>
+                    <th onclick="sortTable(9)" class="text-right">Diferencia</th>
+                    <th onclick="sortTable(10)" class="text-right">TP Actual</th>
+                    <th onclick="sortTable(11)" class="text-center">AXT</th>
+                    <th onclick="sortTable(12)" class="text-center">EXT G</th>
+                    <th onclick="sortTable(13)" class="text-center">INSTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>ALAJUELA</strong></td>
+                    <td class="text-right">₡ 33.264.841,50</td>
+                    <td class="text-right">₡ 38.017.794,24</td>
+                    <td class="text-right">₡ 4.752.952,74</td>
+                    <td class="text-center"><span class="badge badge-success">114,3%</span></td>
+                    <td class="text-center"><span class="badge badge-success">114,3%</span></td>
+                    <td class="text-right">₡ 30.240.765,00</td>
+                    <td class="text-right">₡ 38.017.794,24</td>
+                    <td class="text-center"><span class="status-dot dot-green"></span></td>
+                    <td class="text-right">₡ 7.777.029,24</td>
+                    <td class="text-right">₡ 24.230,59</td>
+                    <td class="text-center">2,01</td>
+                    <td class="text-center">
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: 67%;"></div></div><strong>67%</strong>
+                    </td>
+                    <td class="text-center"><strong>6</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Call Center</strong></td>
+                    <td class="text-right">₡ 15.523.214,00</td>
+                    <td class="text-right">₡ 18.329.637,75</td>
+                    <td class="text-right">₡ 2.806.423,75</td>
+                    <td class="text-center"><span class="badge badge-success">118,1%</span></td>
+                    <td class="text-center"><span class="badge badge-success">118,1%</span></td>
+                    <td class="text-right">₡ 7.392.007,00</td>
+                    <td class="text-right">₡ 18.329.637,75</td>
+                    <td class="text-center"><span class="status-dot dot-green"></span></td>
+                    <td class="text-right">₡ 10.937.630,75</td>
+                    <td class="text-right">₡ 44.061,63</td>
+                    <td class="text-center">2,19</td>
+                    <td class="text-center">
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: 9%;"></div></div><strong>9%</strong>
+                    </td>
+                    <td class="text-center"><strong>3</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>CURRIDABAT</strong></td>
+                    <td class="text-right">₡ 19.635.000,00</td>
+                    <td class="text-right">₡ 25.591.067,05</td>
+                    <td class="text-right">₡ 5.956.067,05</td>
+                    <td class="text-center"><span class="badge badge-success">130,3%</span></td>
+                    <td class="text-center"><span class="badge badge-success">130,3%</span></td>
+                    <td class="text-right">₡ -</td>
+                    <td class="text-right">₡ 25.591.067,05</td>
+                    <td class="text-center"><span class="status-dot dot-green"></span></td>
+                    <td class="text-right">₡ 25.591.067,05</td>
+                    <td class="text-right">₡ 23.413,60</td>
+                    <td class="text-center">2,02</td>
+                    <td class="text-center">
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: 84%;"></div></div><strong>84%</strong>
+                    </td>
+                    <td class="text-center"><strong>1</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>ESCAZU</strong></td>
+                    <td class="text-right">₡ 28.661.808,00</td>
+                    <td class="text-right">₡ 25.885.155,67</td>
+                    <td class="text-right">-₡ 2.776.652,33</td>
+                    <td class="text-center"><span class="badge badge-warning">90,3%</span></td>
+                    <td class="text-center"><span class="badge badge-warning">90,3%</span></td>
+                    <td class="text-right">₡ 27.296.960,00</td>
+                    <td class="text-right">₡ 25.885.155,67</td>
+                    <td class="text-center"><span class="status-dot dot-red"></span></td>
+                    <td class="text-right">₡ 1.411.804,33</td>
+                    <td class="text-right">₡ 20.841,51</td>
+                    <td class="text-center">1,81</td>
+                    <td class="text-center">
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: 77%;"></div></div><strong>77%</strong>
+                    </td>
+                    <td class="text-center"><strong>4</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>HEREDIA 2</strong></td>
+                    <td class="text-right">₡ 29.517.168,00</td>
+                    <td class="text-right">₡ 28.996.651,36</td>
+                    <td class="text-right">-₡ 520.516,64</td>
+                    <td class="text-center"><span class="badge badge-warning">98,2%</span></td>
+                    <td class="text-center"><span class="badge badge-warning">98,2%</span></td>
+                    <td class="text-right">₡ 14.758.584,00</td>
+                    <td class="text-right">₡ 28.996.651,36</td>
+                    <td class="text-center"><span class="status-dot dot-green"></span></td>
+                    <td class="text-right">₡ 14.238.067,36</td>
+                    <td class="text-right">₡ 19.658,75</td>
+                    <td class="text-center">2,26</td>
+                    <td class="text-center">
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: 39%;"></div></div><strong>39%</strong>
+                    </td>
+                    <td class="text-center"><strong>4</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <footer>
+        Dashboard interactivo adaptado de control de ventas.
+    </footer>
+</div>
+
+<script>
+    // Función para buscar/filtrar dinámicamente en la tabla
+    function filterTable() {
+        let input = document.getElementById("searchInput");
+        let filter = input.value.toUpperCase();
+        let table = document.getElementById("dashboardTable");
+        let tr = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < tr.length; i++) {
+            let td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                let txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    // Función básica para ordenar columnas al hacer clic en los encabezados
+    function sortTable(n) {
+        let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("dashboardTable");
+        switching = true;
+        dir = "asc";
+        
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                
+                let xVal = x.textContent || x.innerText;
+                let yVal = y.textContent || y.innerText;
+                
+                // Limpiar formato de moneda o porcentajes para ordenar numéricamente si es posible
+                let xNum = parseFloat(xVal.replace(/[^0-9,-]+/g,"").replace(",", "."));
+                let yNum = parseFloat(yVal.replace(/[^0-9,-]+/g,"").replace(",", "."));
+                
+                if (!isNaN(xNum) && !isNaN(yNum)) {
+                    if (dir == "asc") {
+                        if (xNum > yNum) { shouldSwitch = true; break; }
+                    } else if (dir == "desc") {
+                        if (xNum < yNum) { shouldSwitch = true; break; }
+                    }
+                } else {
+                    if (dir == "asc") {
+                        if (xVal.toLowerCase() > yVal.toLowerCase()) { shouldSwitch = true; break; }
+                    } else if (dir == "desc") {
+                        if (xVal.toLowerCase() < yVal.toLowerCase()) { shouldSwitch = true; break; }
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
